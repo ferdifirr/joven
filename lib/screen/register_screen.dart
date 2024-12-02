@@ -21,7 +21,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
-  bool _isUsernameValid = true; // Assume username is valid by default
+  bool _isUsernameValid = false; // Assume username is valid by default
   bool _isCheckingUsername = false;
   bool _isLoading = false;
   Timer? _debounce;
@@ -45,7 +45,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _onUsernameChanged() {
-    if (_usernameController.text.isEmpty) {
+    if (_usernameController.text.isEmpty ||
+        _usernameController.text.contains(' ')) {
       setState(() {
         _isUsernameValid = false;
       });
@@ -84,20 +85,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       'phone_number': _phoneController.text,
       'password': _passwordController.text,
     };
-    try {
-      await _apiService.postRequest('/api/user/register', data);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration successful!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pop(context);
-    } catch (e) {
-      Log.d(e.toString());
-    } finally {
-      _isLoadingStatus(false);
-    }
+    Navigator.pushNamed(
+      context,
+      Routes.registerVendor,
+      arguments: data,
+    );
   }
 
   @override
@@ -218,8 +210,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ElevatedButton(
                     onPressed: _isUsernameValid
                         ? () {
-                            // _registerUser();
-                            Navigator.pushNamed(context, Routes.registerVendor);
+                            _registerUser();
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
